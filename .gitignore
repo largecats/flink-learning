@@ -1,0 +1,45 @@
+### SBT ###
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+.history
+.cache
+.lib/
+
+
+### Scala ###
+*.class
+*.log
+
+
+### Intellij ###
+# User-specific stuff:
+.idea/*
+.bsp/*
+!/.idea/runConfigurations
+/out/
+*.iml
+
+
+### Spark ###
+spark-warehouse/
+
+
+### Scalastyle ###
+/project/scalastyle_config.xml
+scalastyle.sh
+
+### Generated files ###
+oozie/
+
+### Mac ###
+.DS_Store
+
+### Windows ###
+*.ipr
+*.iws
+
+
