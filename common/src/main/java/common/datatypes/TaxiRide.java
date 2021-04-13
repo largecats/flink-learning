@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-package org.apache.flink.training.exercises.common.datatypes;
+package common.datatypes;
 
-import org.apache.flink.training.exercises.common.utils.DataGenerator;
-import org.apache.flink.training.exercises.common.utils.GeoUtils;
+import common.utils.DataGenerator;
+import common.utils.GeoUtils;
 
 import javax.annotation.Nullable;
 

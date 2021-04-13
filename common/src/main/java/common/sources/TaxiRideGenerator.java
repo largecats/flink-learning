@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-package org.apache.flink.training.exercises.common.sources;
+package common.sources;
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
-import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
+import common.datatypes.TaxiRide;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-package org.apache.flink.training.exercises.common.utils;
+package common.utils;
 
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
-import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
+import common.datatypes.TaxiFare;
+import common.datatypes.TaxiRide;
 
 /**
  * Base for all exercises with a few helper methods.

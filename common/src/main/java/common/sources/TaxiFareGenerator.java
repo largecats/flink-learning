@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-package org.apache.flink.training.exercises.common.sources;
+package common.sources;
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
-import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
+import common.datatypes.TaxiFare;
 
 /**
  * This SourceFunction generates a data stream of TaxiFare records that include event time

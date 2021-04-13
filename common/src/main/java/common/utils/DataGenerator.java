@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.training.exercises.common.utils;
+package common.utils;
 
 import java.time.Instant;
 import java.util.Random;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.training.exercises.common.utils;
+package common.utils;
 
 /**
  * Exception denoting a missing solution (results in tests verifying the solution instead).

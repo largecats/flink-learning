@@ -1,6 +1,6 @@
-package org.apache.flink.training.exercises.common.datatypes;
+package common.datatypes;
 
-import org.apache.flink.training.exercises.common.utils.GeoUtils;
+import common.utils.GeoUtils;
 
 public class EnrichedRide extends TaxiRide {
     public int startCell;

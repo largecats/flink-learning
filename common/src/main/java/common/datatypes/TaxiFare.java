@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package org.apache.flink.training.exercises.common.datatypes;
+package common.datatypes;
 
-import org.apache.flink.training.exercises.common.utils.DataGenerator;
+import common.utils.DataGenerator;
 
 import java.io.Serializable;
 import java.time.Instant;
