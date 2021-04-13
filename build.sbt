@@ -1,8 +1,11 @@
 ThisBuild / version := "1.0.0"
 ThisBuild / scalaVersion := "2.11.12" // rollback test
 
+lazy val common = (project in file("common"))
+  .settings(name := "common")
+  .settings(globalSettings)
+
 lazy val wordCount = newProject(name = "wordCount")
-lazy val windowWordCount = newProject(name = "windowWordCount")
 
 lazy val globalSettings = dependencySettings ++ runSettings ++ assemblySettings
 
