@@ -39,7 +39,7 @@ min() output:
 
 minBy() output:
 6> (0,2,3)
-6> (0,1,1)
+6> (0,1,1) // The entire element is updated if a new minimum is found
 6> (0,1,1)
 6> (1,3,4)
 6> (1,3,4)
