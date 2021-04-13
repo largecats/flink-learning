@@ -1,11 +1,11 @@
 ThisBuild / version := "1.0.0"
-ThisBuild / scalaVersion := "2.11.12" // rollback test
+ThisBuild / scalaVersion := "2.11.12"
 
 lazy val common = (project in file("common"))
   .settings(name := "common")
   .settings(globalSettings)
 
-lazy val wordCount = newProject(name = "wordCount")
+lazy val minVsMinBy = newProject(name = "minVsMinBy")
 
 lazy val globalSettings = dependencySettings ++ runSettings ++ assemblySettings
 
@@ -87,4 +87,5 @@ def createProject(name: String, path: String): Project = {
       assembly / mainClass := Some("Main"),
       assembly / assemblyJarName := s"$name.jar"
     )
+    .dependsOn(common % "compile->compile;test->test") // the compilation/test of project depends on the compilation/test of common
 }
