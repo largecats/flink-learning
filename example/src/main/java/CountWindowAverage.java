@@ -8,7 +8,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 
-public class CountWindowAverage extends RichFlatMapFunction<Tuple2<Long, Long>, Tuple2<Long, Long>> {
+public class CountWindowAverage extends RichFlatMapFunction<Tuple2<Long, Long>, Tuple2<Long, Double>> {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -24,16 +24,16 @@ public class CountWindowAverage extends RichFlatMapFunction<Tuple2<Long, Long>, 
     /**
      * The ValueState handle. The first field is the count, the second field a running sum.
      */
-    private transient ValueState<Tuple2<Long, Long>> sum;
+    private transient ValueState<Tuple2<Long, Double>> sum;
 
     @Override
-    public void flatMap(Tuple2<Long, Long> input, Collector<Tuple2<Long, Long>> out) throws Exception {
+    public void flatMap(Tuple2<Long, Long> input, Collector<Tuple2<Long, Double>> out) throws Exception {
 
         // access the state value
-        Tuple2<Long, Long> currentSum = sum.value();
+        Tuple2<Long, Double> currentSum = sum.value();
 
         if (currentSum == null) {
-            currentSum = Tuple2.of(0L, 0L);
+            currentSum = Tuple2.of(0L, 0D);
         }
 
         // update the count
@@ -54,7 +54,7 @@ public class CountWindowAverage extends RichFlatMapFunction<Tuple2<Long, Long>, 
 
     @Override
     public void open(Configuration config) {
-        ValueStateDescriptor<Tuple2<Long, Long>> descriptor =
+        ValueStateDescriptor<Tuple2<Long, Double>> descriptor =
                 new ValueStateDescriptor<>(
                         "average", // the state name
                         TypeInformation.of(new TypeHint<>() {})); // type information; default value is deprecated, needs to check manually
@@ -63,6 +63,6 @@ public class CountWindowAverage extends RichFlatMapFunction<Tuple2<Long, Long>, 
 }
 
 /* Output:
-6> (1,4)
-6> (1,5)
+6> (1,4.0)
+6> (1,5.5)
  */
