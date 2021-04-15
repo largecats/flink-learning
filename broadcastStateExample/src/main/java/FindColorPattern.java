@@ -78,8 +78,8 @@ public class FindColorPattern {
          */
         @Override
         public void processBroadcastElement(Rule value,
-//                KeyedBroadcastProcessFunction.Context ctx, // KeyedBroadcastProcessFunction is already imported; this line is not the correct signature
                 Context ctx,
+//                KeyedBroadcastProcessFunction<Color, Item, Rule, String>.Context ctx, // KeyedBroadcastProcessFunction.Context is not the correct type, need to supply type parameter
                 Collector<String> out) throws Exception {
             ctx.getBroadcastState(ruleStateDescriptor).put(value.name, value);
         }
