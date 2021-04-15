@@ -133,9 +133,36 @@ public class FindColorPattern {
             }
         }
     }
-
-
-
-
-
 }
+
+/* Issue 1
+Why stored = null in each iteration?
+Output:
+shape.value = rectangle
+shape.value = rectangle
+ruleName = two_rectangles
+rule.first.value = rectangle, rule.second.value = rectangle
+stored = null
+shape.equals(rule.first) = true
+stored = [Item@60955147]
+
+shape.value = rectangle
+ruleName = two_rectangles
+rule.first.value = rectangle, rule.second.value = rectangle
+stored = null
+shape.equals(rule.first) = true
+stored = [Item@1d436a4f]
+
+shape.value = rectangle
+ruleName = two_rectangles
+rule.first.value = rectangle, rule.second.value = rectangle
+stored = null
+shape.equals(rule.first) = true
+stored = [Item@16937fb2]
+ */
+
+/*
+Issue 2
+The order of the items printed is different from the order of items in env.fromElements().
+Can change to different shapes and/or keys to observe.
+ */
