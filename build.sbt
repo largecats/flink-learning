@@ -5,8 +5,9 @@ lazy val common = (project in file("common"))
   .settings(name := "common")
   .settings(globalSettings)
 
-lazy val exapmle = newProject(name = "example")
+lazy val example = newProject(name = "example")
 lazy val minVsMinBy = newProject(name = "minVsMinBy")
+lazy val broadcastStateExample = newProject(name = "broadcastStateExample")
 
 lazy val globalSettings = dependencySettings ++ runSettings ++ assemblySettings
 
