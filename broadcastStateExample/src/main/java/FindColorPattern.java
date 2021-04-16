@@ -29,16 +29,24 @@ public class FindColorPattern {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         DataStream<Item> itemStream = env.fromElements(
+                new Item(new Color("blue"), new Shape("rectangle")),
+                new Item(new Color("blue"), new Shape("circle")),
+                new Item(new Color("blue"), new Shape("circle")),
+                new Item(new Color("blue"), new Shape("square")),
+                new Item(new Color("blue"), new Shape("rectangle")),
+                new Item(new Color("blue"), new Shape("triangle")),
                 new Item(new Color("red"), new Shape("rectangle")),
+                new Item(new Color("red"), new Shape("circle")),
                 new Item(new Color("red"), new Shape("rectangle")),
-                new Item(new Color("red"), new Shape("rectangle")),
+                new Item(new Color("red"), new Shape("triangle")),
                 new Item(new Color("red"), new Shape("rectangle"))
         );
         DataStream<Rule> ruleStream = env.fromElements(
-                new Rule("two_rectangles", new Shape("rectangle"), new Shape("rectangle"))
+                new Rule("test_rule", new Shape("rectangle"), new Shape("triangle"))
         );
         // Since we want pairs of the same color, we can just key the object stream by color.
-        KeyedStream<Item, Color> colorPartitionedStream = itemStream.keyBy(x -> x.color);
+//        KeyedStream<Item, Color> colorPartitionedStream = itemStream.keyBy(x -> x.color);
+        KeyedStream<Item, String> colorPartitionedStream = itemStream.keyBy(x -> x.color.value);
 
         // Map descriptor rule name -> rule, for creating broadcast state later
         MapStateDescriptor<String, Rule> ruleStateDescriptor = new MapStateDescriptor<>(
@@ -96,31 +104,30 @@ public class FindColorPattern {
 
             final MapState<String, List<Item>> state = getRuntimeContext().getMapState(mapStateDesc);
             final Shape shape = value.getShape();
-            System.out.println("shape.value = " + shape.value);
+            // System.out.println("shape.value = " + shape.value);
 
             for (Map.Entry<String, Rule> entry :
                     ctx.getBroadcastState(ruleStateDescriptor).immutableEntries()) { // Empty at first run (which means processBroadcastElement() is not run yet?)
                 final String ruleName = entry.getKey();
-                System.out.println("ruleName = " + ruleName);
+                // System.out.println("ruleName = " + ruleName);
                 final Rule rule = entry.getValue();
-                System.out.println("rule.first.value = " + rule.first.value + ", rule.second.value = " + rule.second.value);
+                // System.out.println("rule.first.value = " + rule.first.value + ", rule.second.value = " + rule.second.value);
 
                 List<Item> stored = state.get(ruleName);
-                System.out.println("stored = " + stored);
+                // System.out.println("stored = " + stored);
                 if (stored == null) {
                     stored = new ArrayList<>();
                 }
 
                 if (shape.equals(rule.second) && !stored.isEmpty()) {
                     for (Item i : stored) { // Why can match more than one first element?
-                        System.out.print("match found");
-                        out.collect("MATCH: " + i + " - " + value);
+                        out.collect("MATCH color: " + i.color.value + ", shape: " + i.shape.value + " - " + "color: " + value.color.value + ", shape: " + value.shape.value);
                     }
                     stored.clear();
                 }
 
                 // there is no else{} to cover if rule.first == rule.second
-                System.out.println("shape.equals(rule.first) = " + shape.equals(rule.first));
+                // System.out.println("shape.equals(rule.first) = " + shape.equals(rule.first));
                 if (shape.equals(rule.first)) {
                     stored.add(value);
                 }
@@ -130,28 +137,39 @@ public class FindColorPattern {
                 } else {
                     state.put(ruleName, stored);
                 }
-                System.out.println("stored = " + stored);
-                System.out.println("");
+                // System.out.println("stored = " + stored);
+                // System.out.println("");
             }
         }
     }
 }
 
-/* Issue 1
-Why stored = null in each iteration?
-Output:
+/*
+Expected output with keyBy x.color.value:
+8> MATCH color: red, shape: rectangle - color: red, shape: triangle
+3> MATCH color: blue, shape: rectangle - color: blue, shape: triangle
+ */
+
+/*
+Pitfalls
+
+1. keyBy
+When keyBy x.color, stored = null in each iteration.
+
+E.g.: Input 4 red rectangles, and observe what's printed:
+
 shape.value = rectangle
 shape.value = rectangle
 ruleName = two_rectangles
 rule.first.value = rectangle, rule.second.value = rectangle
 stored = null
 shape.equals(rule.first) = true
-stored = [Item@60955147]
+stored = [Item@60955147]                                                        <- item added
 
 shape.value = rectangle
 ruleName = two_rectangles
 rule.first.value = rectangle, rule.second.value = rectangle
-stored = null
+stored = null                                                                   <- but stored becomes empty again at next iteration
 shape.equals(rule.first) = true
 stored = [Item@1d436a4f]
 
@@ -161,10 +179,7 @@ rule.first.value = rectangle, rule.second.value = rectangle
 stored = null
 shape.equals(rule.first) = true
 stored = [Item@16937fb2]
- */
 
-/*
-Issue 2
-The order of the items printed is different from the order of items in env.fromElements().
-Can change to different shapes and/or keys to observe.
+2. The first items for each key may have been processed before rule is detected. So to observe the effect of rule evaluation, can insert some more
+items with the same key before the pattern.
  */
