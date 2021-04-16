@@ -14,6 +14,8 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.ListTypeInfo;
 
+import common.datatypes.*;
+
 import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ public class FindColorPattern {
                 new Item(new Color("red"), new Shape("rectangle"))
         );
         DataStream<Rule> ruleStream = env.fromElements(
-                new Rule("two_rectangles", Tuple2.of(new Shape("rectangle"), new Shape("rectangle")))
+                new Rule("two_rectangles", new Shape("rectangle"), new Shape("rectangle"))
         );
         // Since we want pairs of the same color, we can just key the object stream by color.
         KeyedStream<Item, Color> colorPartitionedStream = itemStream.keyBy(x -> x.color);
