@@ -6,7 +6,13 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
+import org.apache.flink.util.Collector;
 
 import java.util.Iterator;
 
@@ -14,7 +20,14 @@ public class WindowFunction {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        DataStream<Tuple2<Long, Long>> input = env.fromElements(Tuple2.of(1L, 3L), Tuple2.of(1L, -2L), Tuple2.of(1L, 19L), Tuple2.of(2L, 10L), Tuple2.of(2L, 5L), Tuple2.of(2L, 23L));
+        DataStream<Tuple2<Long, Long>> input = env.fromElements(
+                Tuple2.of(1L, 3L),
+                Tuple2.of(1L, -2L),
+                Tuple2.of(1L, 19L),
+                Tuple2.of(2L, 10L),
+                Tuple2.of(2L, 5L),
+                Tuple2.of(2L, 23L)
+        );
 
         KeyedStream<Tuple2<Long, Long>, Long> keyedInput = input.keyBy(x -> x.f0);
 
@@ -28,18 +41,39 @@ public class WindowFunction {
 
         System.out.println("AverageAggregate");
         Iterator<Double> averageAggregate = keyedInput
-                .countWindow(3)
+                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(1))) // need some window; need to use milliseconds otherwise the output is empty, probably because this is batch stream?
+//                .countWindow(3) // also can
                 .aggregate(new AverageAggregate())
                 .executeAndCollect();
         while (averageAggregate.hasNext()) {
             System.out.println(averageAggregate.next());
         }
+
+        System.out.println("SumProcess");
+        Iterator<String> sumProcess = keyedInput
+                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(1))) // need to use TimeWindow in SumProcess
+//                .countWindow(3) // need to use GlobalWindow in SumProcess (so count window is a type of global window?)
+                .process(new SumProcess())
+                .executeAndCollect();
+        while (sumProcess.hasNext()) {
+            System.out.println(sumProcess.next());
+        }
+
+        // Get smallest event in window and window start time
+        System.out.println("SmallestReduce + SmallestProcess");
+        Iterator<Tuple2<Long, Long>> smallestReduceProcess = keyedInput
+                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(1)))
+                .reduce(new SmallestReduce(), new SmallestProcess())
+                .executeAndCollect();
+        while (smallestReduceProcess.hasNext()) {
+            System.out.println(smallestReduceProcess.next());
+        }
     }
 
     public static class SumReduce implements ReduceFunction<Tuple2<Long, Long>> {
         @Override
-        public Tuple2<Long, Long> reduce(Tuple2<Long, Long> value1, Tuple2<Long, Long> value2) throws Exception {
-            return new Tuple2<>(value1.f0, value1.f1 + value2.f1);
+        public Tuple2<Long, Long> reduce(Tuple2<Long, Long> e1, Tuple2<Long, Long> e2) throws Exception {
+            return new Tuple2<>(e1.f0, e1.f1 + e2.f1);
         }
     }
 
@@ -68,17 +102,49 @@ public class WindowFunction {
             return new Tuple2<>(a.f0 + b.f0, a.f1 + b.f1);
         }
     }
+
+    public static class SumProcess extends ProcessWindowFunction<Tuple2<Long, Long>, String, Long, TimeWindow> { // Must use GlobalWindow (so .countWindow() actually produces a GlobalWindow?
+        @Override
+        public void process(Long key, Context context, Iterable<Tuple2<Long, Long>> input, Collector<String> out) throws Exception {
+            long sum = 0;
+            for (Tuple2<Long, Long> in: input) {
+                sum += in.f1;
+            }
+            out.collect("Window: " + context.window() + " sum: " + sum);
+        }
+    }
+
+    public static class SmallestReduce implements ReduceFunction<Tuple2<Long, Long>> {
+        @Override
+        public Tuple2<Long, Long> reduce(Tuple2<Long, Long> e1, Tuple2<Long, Long> e2) throws Exception {
+            return new Tuple2<>(e1.f0, e1.f1 > e2.f1? e2.f1: e1.f1);
+        }
+    }
+
+    public static class SmallestProcess extends ProcessWindowFunction<Tuple2<Long, Long>, Tuple2<Long, Long>, Long, TimeWindow> {
+        @Override
+        public void process(Long key, Context context, Iterable<Tuple2<Long, Long>> minValues, Collector<Tuple2<Long, Long>> out) {
+            Long min = minValues.iterator().next().f1;
+            out.collect(new Tuple2<Long, Long>(context.window().getStart(), min));
+        }
+    }
 }
 
 /*
 SumReduce
-(1,3)
-(1,1)
-(1,20)
 (2,10)
 (2,15)
 (2,38)
+(1,3)
+(1,1)
+(1,20)
 AverageAggregate
-6.666666666666667
 12.666666666666666
+6.666666666666667
+SumProcess
+Window: GlobalWindow sum: 38
+Window: GlobalWindow sum: 20
+SmallestReduce + SmallestProcess
+(1618820604034,3)
+(1618820604035,10)
  */
