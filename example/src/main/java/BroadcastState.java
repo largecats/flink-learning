@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FindColorPattern {
+public class BroadcastState {
     /*
     Given a stream of objects of different colors and shapes, want to find pairs of objects of the same color that have certain pattern, e.g., rectangle followed by triangle.
     One stream contains the objects, the other stream contains the rules.

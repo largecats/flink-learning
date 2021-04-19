@@ -9,7 +9,7 @@ import common.sources.ItemGenerator
 /*
 Scala version of FindColorPattern.
  */
-object FindColorPattern1 {
+object BroadcastState1 {
 
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
