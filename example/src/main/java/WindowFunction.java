@@ -10,6 +10,8 @@ import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.triggers.Trigger;
+import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.util.Collector;
@@ -63,6 +65,8 @@ public class WindowFunction {
         System.out.println("SmallestReduce + SmallestProcess");
         Iterator<Tuple2<Long, Long>> smallestReduceProcess = keyedInput
                 .window(TumblingProcessingTimeWindows.of(Time.milliseconds(1)))
+//                .window(GlobalWindows.create())
+//                .trigger(new TriggerGlobalWindowOnElement())
                 .reduce(new SmallestReduce(), new SmallestProcess())
                 .executeAndCollect();
         while (smallestReduceProcess.hasNext()) {
@@ -77,6 +81,30 @@ public class WindowFunction {
                 .executeAndCollect();
         while (averageAggregateProcess.hasNext()) {
             System.out.println(averageAggregateProcess.next());
+        }
+    }
+
+    public static class TriggerGlobalWindowOnElement extends Trigger<Tuple2<Long, Long>, GlobalWindow> {
+        // TBD
+
+        @Override
+        public TriggerResult onElement(Tuple2<Long, Long> element, long timestamp, GlobalWindow window, TriggerContext ctx) throws Exception {
+            return null;
+        }
+
+        @Override
+        public TriggerResult onProcessingTime(long time, GlobalWindow window, TriggerContext ctx) throws Exception {
+            return null;
+        }
+
+        @Override
+        public TriggerResult onEventTime(long time, GlobalWindow window, TriggerContext ctx) throws Exception {
+            return null;
+        }
+
+        @Override
+        public void clear(GlobalWindow window, TriggerContext ctx) throws Exception {
+
         }
     }
 
