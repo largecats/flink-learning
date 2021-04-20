@@ -1,4 +1,7 @@
+package common.datatypes;
+
 import java.io.Serializable;
+import java.lang.Object;
 
 public class Color implements Serializable {
     public Color() {};

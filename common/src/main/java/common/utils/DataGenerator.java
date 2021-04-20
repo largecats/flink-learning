@@ -20,6 +20,7 @@ package common.utils;
 
 import java.time.Instant;
 import java.util.Random;
+import java.util.List;
 
 /**
  * Data generator for the fields in TaxiRide and TaxiFare objects.
@@ -33,6 +34,8 @@ public class DataGenerator {
 	private static final int SECONDS_BETWEEN_RIDES = 20;
 	private static final int NUMBER_OF_DRIVERS = 200;
 	private static final Instant beginTime = Instant.parse("2020-01-01T12:00:00.00Z");
+	private static final List<String> COLORS = List.of("red", "blue");
+	private static final List<String> SHAPES = List.of("circle", "triangle", "rectangle");
 
 	private transient long rideId;
 
@@ -140,6 +143,10 @@ public class DataGenerator {
 	public float totalFare() {
 		return (float) (3.0 + (1.0 * rideDurationMinutes()) + tip() + tolls());
 	}
+
+	public String color() { return COLORS.get(new Random().nextInt(COLORS.size())); }
+
+	public String shape() { return SHAPES.get(new Random().nextInt(SHAPES.size())); }
 
 	/**
 	 * The LongRides exercise needs to have some rides with a duration > 2 hours, but not too many.
