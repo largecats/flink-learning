@@ -21,17 +21,8 @@ public class TumblingWindowJoin {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-//        DataStream<TaxiRide> rides = env.addSource(new TaxiRideGenerator());
-//        DataStream<TaxiFare> fares = env.addSource(new TaxiFareGenerator());
-//        rides.join(fares)
-//                .where(x -> x.rideId)
-//                .equalTo(x -> x.rideId)
-//                .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
-//                .apply(new TaxiJoinFunction())
-//        .print();
-
         DataStreamSource<Tuple2<Integer, Long>> orangeStream = env.fromElements(
-                Tuple2.of(0, 0L),
+                Tuple2.of(0, 0L), // integer, timestamp
                 Tuple2.of(1, 1L),
                 Tuple2.of(2, 2L),
                 Tuple2.of(3, 3L),
@@ -58,19 +49,12 @@ public class TumblingWindowJoin {
         orangeStream.join(greenStream)
                 .where(x -> x.f0)
                 .equalTo(x -> x.f0)
-                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(2)))
+                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(2))) // tumbling window of size 2ms
                 .apply(new IntegerJoinFunction())
                 .print();
 
         env.execute();
 
-    }
-
-    public static class TaxiJoinFunction implements JoinFunction<TaxiRide, TaxiFare, Tuple2<TaxiRide, TaxiFare>> {
-        @Override
-        public Tuple2<TaxiRide, TaxiFare> join(TaxiRide ride, TaxiFare fare) {
-            return Tuple2.of(ride, fare);
-        }
     }
 
     public static class IntegerJoinFunction implements JoinFunction<Tuple2<Integer, Long>, Tuple2<Integer, Long>, String> {
