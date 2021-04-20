@@ -13,8 +13,9 @@ public class ItemGenerator implements SourceFunction<Item> {
         while (running) {
             Item item = new Item();
 
-            ctx.collectWithTimestamp(item, item.getEventTime());
-            ctx.emitWatermark(new Watermark(item.getEventTime()));
+            long eventTime = item.getEventTime();
+            ctx.collectWithTimestamp(item, eventTime);
+            ctx.emitWatermark(new Watermark(eventTime));
 
             Thread.sleep(ItemGenerator.SLEEP_MILLIS_PER_EVENT);
         }

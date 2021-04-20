@@ -1,6 +1,8 @@
+import org.apache.commons.net.ntp.TimeStamp;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
-import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.*;
 import org.apache.flink.streaming.api.datastream.DataStreamUtils;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -18,24 +20,28 @@ import org.apache.flink.util.Collector;
 
 import java.util.concurrent.TimeUnit;
 import java.util.Iterator;
+import java.time.Duration;
 
 public class WindowFunction {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        DataStream<Tuple2<Long, Long>> input = env.fromElements(
-                Tuple2.of(1L, 3L),
-                Tuple2.of(1L, -2L),
-                Tuple2.of(1L, 19L),
-                Tuple2.of(2L, 10L),
-                Tuple2.of(2L, 5L),
-                Tuple2.of(2L, 23L)
-        );
-
-        KeyedStream<Tuple2<Long, Long>, Long> keyedInput = input.keyBy(x -> x.f0);
+        DataStream<Tuple3<Long, Long, Long>> input = env.fromElements(
+                Tuple3.of(1L, 3L, 1L), // key, value, timestamp
+                Tuple3.of(1L, -2L, 2L),
+                Tuple3.of(1L, 19L, 3L),
+                Tuple3.of(2L, 10L, 4L),
+                Tuple3.of(2L, 5L, 5L),
+                Tuple3.of(2L, 23L, 6L))
+                .assignTimestampsAndWatermarks(
+                        WatermarkStrategy
+                                .<Tuple3<Long, Long, Long>>forBoundedOutOfOrderness(Duration.ofMillis(0))
+                        .withTimestampAssigner((event, timestamp) -> event.f2) // 3rd column is timestamp
+                );
+        KeyedStream<Tuple3<Long, Long, Long>, Long> keyedInput = input.keyBy(x -> x.f0);
 
         System.out.println("SumReduce");
-        Iterator<Tuple2<Long, Long>> sumReduce = keyedInput
+        Iterator<Tuple3<Long, Long, Long>> sumReduce = keyedInput
                 .reduce(new SumReduce())
                 .executeAndCollect();
         while (sumReduce.hasNext()) {
@@ -53,7 +59,7 @@ public class WindowFunction {
 
         System.out.println("SumProcess");
         Iterator<String> sumProcess = keyedInput
-//                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(1))) // need to use TimeWindow in SumProcess; output may be incomplete if delay is > 1ms
+//                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(2))) // need to use TimeWindow in SumProcess; output may be incomplete if delay is > 1ms
                 .countWindow(3) // need to use GlobalWindow in SumProcess (so count window is a type of global window?)
                 .process(new SumProcess())
                 .executeAndCollect();
@@ -64,9 +70,7 @@ public class WindowFunction {
         // Get smallest event in window and window start time
         System.out.println("SmallestReduce + SmallestProcess");
         Iterator<Tuple2<Long, Long>> smallestReduceProcess = keyedInput
-                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(1)))
-//                .window(GlobalWindows.create())
-//                .trigger(new TriggerGlobalWindowOnElement())
+                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(3)))
                 .reduce(new SmallestReduce(), new SmallestProcess())
                 .executeAndCollect();
         while (smallestReduceProcess.hasNext()) {
@@ -84,38 +88,14 @@ public class WindowFunction {
         }
     }
 
-    public static class TriggerGlobalWindowOnElement extends Trigger<Tuple2<Long, Long>, GlobalWindow> {
-        // TBD
-
+    public static class SumReduce implements ReduceFunction<Tuple3<Long, Long, Long>> {
         @Override
-        public TriggerResult onElement(Tuple2<Long, Long> element, long timestamp, GlobalWindow window, TriggerContext ctx) throws Exception {
-            return null;
-        }
-
-        @Override
-        public TriggerResult onProcessingTime(long time, GlobalWindow window, TriggerContext ctx) throws Exception {
-            return null;
-        }
-
-        @Override
-        public TriggerResult onEventTime(long time, GlobalWindow window, TriggerContext ctx) throws Exception {
-            return null;
-        }
-
-        @Override
-        public void clear(GlobalWindow window, TriggerContext ctx) throws Exception {
-
+        public Tuple3<Long, Long, Long> reduce(Tuple3<Long, Long, Long> e1, Tuple3<Long, Long, Long> e2) throws Exception {
+            return new Tuple3<>(e1.f0, e1.f1 + e2.f1, e1.f2 < e2.f2? e2.f2: e1.f2);
         }
     }
 
-    public static class SumReduce implements ReduceFunction<Tuple2<Long, Long>> {
-        @Override
-        public Tuple2<Long, Long> reduce(Tuple2<Long, Long> e1, Tuple2<Long, Long> e2) throws Exception {
-            return new Tuple2<>(e1.f0, e1.f1 + e2.f1);
-        }
-    }
-
-    public static class AverageAggregate implements AggregateFunction<Tuple2<Long, Long>, Tuple2<Long, Long>, Double> {
+    public static class AverageAggregate implements AggregateFunction<Tuple3<Long, Long, Long>, Tuple2<Long, Long>, Double> {
         /*
         accumulator: (running sum, count)
         value: (key, value)
@@ -126,7 +106,7 @@ public class WindowFunction {
         }
 
         @Override
-        public Tuple2<Long, Long> add(Tuple2<Long, Long> value, Tuple2<Long, Long> accumulator) {
+        public Tuple2<Long, Long> add(Tuple3<Long, Long, Long> value, Tuple2<Long, Long> accumulator) {
             return new Tuple2<>(accumulator.f0 + value.f1, accumulator.f1 + 1L);
         }
 
@@ -141,27 +121,28 @@ public class WindowFunction {
         }
     }
 
-    public static class SumProcess extends ProcessWindowFunction<Tuple2<Long, Long>, String, Long, GlobalWindow> {
+//    public static class SumProcess extends ProcessWindowFunction<Tuple3<Long, Long, Long>, String, Long, TimeWindow> {
+    public static class SumProcess extends ProcessWindowFunction<Tuple3<Long, Long, Long>, String, Long, GlobalWindow> {
         @Override
-        public void process(Long key, Context context, Iterable<Tuple2<Long, Long>> input, Collector<String> out) throws Exception {
+        public void process(Long key, Context context, Iterable<Tuple3<Long, Long, Long>> input, Collector<String> out) throws Exception {
             long sum = 0;
-            for (Tuple2<Long, Long> in: input) {
+            for (Tuple3<Long, Long, Long> in: input) {
                 sum += in.f1;
             }
             out.collect("Window: " + context.window() + " sum: " + sum);
         }
     }
 
-    public static class SmallestReduce implements ReduceFunction<Tuple2<Long, Long>> {
+    public static class SmallestReduce implements ReduceFunction<Tuple3<Long, Long, Long>> {
         @Override
-        public Tuple2<Long, Long> reduce(Tuple2<Long, Long> e1, Tuple2<Long, Long> e2) throws Exception {
-            return new Tuple2<>(e1.f0, e1.f1 > e2.f1? e2.f1: e1.f1);
+        public Tuple3<Long, Long, Long> reduce(Tuple3<Long, Long, Long> e1, Tuple3<Long, Long, Long> e2) throws Exception {
+            return e1.f1 < e2.f1? e1: e2;
         }
     }
 
-    public static class SmallestProcess extends ProcessWindowFunction<Tuple2<Long, Long>, Tuple2<Long, Long>, Long, TimeWindow> {
+    public static class SmallestProcess extends ProcessWindowFunction<Tuple3<Long, Long, Long>, Tuple2<Long, Long>, Long, TimeWindow> {
         @Override
-        public void process(Long key, Context context, Iterable<Tuple2<Long, Long>> minValues, Collector<Tuple2<Long, Long>> out) {
+        public void process(Long key, Context context, Iterable<Tuple3<Long, Long, Long>> minValues, Collector<Tuple2<Long, Long>> out) {
             Long min = minValues.iterator().next().f1;
             out.collect(new Tuple2<Long, Long>(context.window().getStart(), min));
         }
@@ -180,19 +161,27 @@ public class WindowFunction {
 
 /*
 SumReduce
-(2,10)
-(2,15)
-(2,38)
-(1,3)
-(1,1)
-(1,20)
+(1,3,1)
+(1,1,2)
+(1,20,3)
+(2,10,4)
+(2,15,5)
+(2,38,6)
 AverageAggregate
 12.666666666666666
 6.666666666666667
 SumProcess
-Window: TimeWindow sum: 38
-Window: TimeWindow sum: 20
-SmallestReduce + SmallestProcess
-(1618820604034,3)
-(1618820604035,10)
+Window: GlobalWindow sum: 38
+Window: GlobalWindow sum: 20
+AverageAggregate + AverageProcess
+(2,12.666666666666666)
+(1,6.666666666666667)
+SmallestReduce + SmallestProcess // sometime prints, sometimes doesn't
+(1618905275896,10)
+(1618905275894,3)
+// sometimes the window start time would be the same
+(1618905304422,10)
+(1618905304422,3)
+// sometimes prints only one record
+(1618905393092,3)
  */
