@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
@@ -27,12 +27,12 @@ public class WindowFunction {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         DataStream<Tuple3<Long, Long, Long>> input = env.fromElements(
-                Tuple3.of(1L, 3L, 1L), // key, value, timestamp
-                Tuple3.of(1L, -2L, 2L),
-                Tuple3.of(1L, 19L, 3L),
-                Tuple3.of(2L, 10L, 4L),
-                Tuple3.of(2L, 5L, 5L),
-                Tuple3.of(2L, 23L, 6L))
+                Tuple3.of(1L, 3L, 0L), // key, value, timestamp
+                Tuple3.of(1L, -2L, 1L),
+                Tuple3.of(1L, 19L, 2L),
+                Tuple3.of(2L, 10L, 3L),
+                Tuple3.of(2L, 5L, 4L),
+                Tuple3.of(2L, 23L, 5L))
                 .assignTimestampsAndWatermarks(
                         WatermarkStrategy
                                 .<Tuple3<Long, Long, Long>>forBoundedOutOfOrderness(Duration.ofMillis(0))
@@ -70,7 +70,7 @@ public class WindowFunction {
         // Get smallest event in window and window start time
         System.out.println("SmallestReduce + SmallestProcess");
         Iterator<Tuple2<Long, Long>> smallestReduceProcess = keyedInput
-                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(3)))
+                .window(TumblingEventTimeWindows.of(Time.milliseconds(3)))
                 .reduce(new SmallestReduce(), new SmallestProcess())
                 .executeAndCollect();
         while (smallestReduceProcess.hasNext()) {
@@ -161,27 +161,22 @@ public class WindowFunction {
 
 /*
 SumReduce
-(1,3,1)
-(1,1,2)
-(1,20,3)
-(2,10,4)
-(2,15,5)
-(2,38,6)
+(1,3,0)
+(1,1,1)
+(1,20,2)
+(2,10,3)
+(2,15,4)
+(2,38,5)
 AverageAggregate
 12.666666666666666
 6.666666666666667
 SumProcess
 Window: GlobalWindow sum: 38
 Window: GlobalWindow sum: 20
+SmallestReduce + SmallestProcess
+(0,-2)
+(3,5)
 AverageAggregate + AverageProcess
 (2,12.666666666666666)
 (1,6.666666666666667)
-SmallestReduce + SmallestProcess // sometime prints, sometimes doesn't
-(1618905275896,10)
-(1618905275894,3)
-// sometimes the window start time would be the same
-(1618905304422,10)
-(1618905304422,3)
-// sometimes prints only one record
-(1618905393092,3)
  */
