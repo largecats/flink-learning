@@ -1,8 +1,3 @@
-import common.datatypes.TaxiFare;
-import common.datatypes.TaxiRide;
-import common.sources.IntegerGenerator;
-import common.sources.TaxiFareGenerator;
-import common.sources.TaxiRideGenerator;
 import org.apache.flink.api.common.eventtime.TimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.JoinFunction;
