@@ -19,12 +19,12 @@ public class CountWithTimeout {
         DataStream<Tuple3<String, String, Long>> stream = env.fromElements( // how to simulate timeout?
                 Tuple3.of("a", "abase", 0L),
                 Tuple3.of("b", "bard", 0L),
-                Tuple3.of("a", "abate", 0L),
-                Tuple3.of("b", "barrage", 0L),
-                Tuple3.of("a", "abbreviate", 70000L),
-                Tuple3.of("b", "baroque", 70000L),
-                Tuple3.of("a", "abdicate", 70000L),
-                Tuple3.of("b", "barren", 70000L)
+                Tuple3.of("a", "abate", 70000L),
+                Tuple3.of("b", "barrage", 70000L),
+                Tuple3.of("a", "abbreviate", 140000L),
+                Tuple3.of("b", "baroque", 140000L),
+                Tuple3.of("a", "abdicate", 210000L),
+                Tuple3.of("b", "barren", 210000L)
                 )
                 .assignTimestampsAndWatermarks(
                         WatermarkStrategy
@@ -100,20 +100,24 @@ public class CountWithTimeout {
 }
 
 /*
-element = (a,abase,0), timestamp = 0
+lement = (a,abase,0), timestamp = 0
 element = (b,bard,0), timestamp = 0
-element = (b,barrage,0), timestamp = 0
-element = (a,abate,0), timestamp = 0
-element = (b,baroque,70000), timestamp = 70000
-element = (a,abbreviate,70000), timestamp = 70000
-element = (b,barren,70000), timestamp = 70000
-element = (a,abdicate,70000), timestamp = 70000
-timestamp = 60000, result.lastModified = 70000 // firing of timer set at 0, why result.lastModified is alrd 70000? Event time progression is different?
-timestamp = 130000, result.lastModified = 70000 // firing of timer set at 70000
-timestamp = 60000, result.lastModified = 70000
-timestamp = 130000, result.lastModified = 70000
-result.key = b, result.count = 4
+element = (a,abate,70000), timestamp = 70000
+element = (b,barrage,70000), timestamp = 70000
+element = (a,abbreviate,140000), timestamp = 140000
+element = (b,baroque,140000), timestamp = 140000
+element = (a,abdicate,210000), timestamp = 210000
+element = (b,barren,210000), timestamp = 210000
+timestamp = 60000, result.lastModified = 210000 // firing of 60s timer set at 0, why result.lastModified is alrd 210000?
+timestamp = 60000, result.lastModified = 210000
+timestamp = 130000, result.lastModified = 210000 // firing of 60s timer set at 70000
+timestamp = 130000, result.lastModified = 210000
+timestamp = 200000, result.lastModified = 210000 // firing of 60s timer set at 140000
+timestamp = 200000, result.lastModified = 210000
+timestamp = 270000, result.lastModified = 210000 // firing of 60s timer set at 210000
+timestamp = 270000, result.lastModified = 210000
 result.key = a, result.count = 4
+result.key = b, result.count = 4
 2> (b,4) // Why only one result is emitted?
 6> (a,4)
  */
