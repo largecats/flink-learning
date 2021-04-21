@@ -1,3 +1,5 @@
+import common.datatypes.TaxiRide;
+import common.sources.TaxiRideGenerator;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -33,8 +35,6 @@ public class CountWithTimeout {
         DataStream<Tuple2<String, Long>> result = stream
                 .keyBy(value -> value.f0)
                 .process(new CountWithTimeoutProcessFunction());
-
-        result.print();
 
         env.execute();
 
