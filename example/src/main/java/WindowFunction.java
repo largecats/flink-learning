@@ -59,8 +59,8 @@ public class WindowFunction {
 
         System.out.println("SumProcess");
         Iterator<String> sumProcess = keyedInput
-//                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(2))) // need to use TimeWindow in SumProcess; output may be incomplete if delay is > 1ms
-                .countWindow(3) // need to use GlobalWindow in SumProcess (so count window is a type of global window?)
+//                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(2))) // if use this line, need to use TimeWindow in SumProcess
+                .countWindow(3) // if use this line, need to use GlobalWindow in SumProcess (so count window is a type of global window?)
                 .process(new SumProcess())
                 .executeAndCollect();
         while (sumProcess.hasNext()) {
