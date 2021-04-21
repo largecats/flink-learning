@@ -36,6 +36,8 @@ public class CountWithTimeout {
                 .keyBy(value -> value.f0)
                 .process(new CountWithTimeoutProcessFunction());
 
+        result.print();
+
         env.execute();
 
     }
@@ -100,7 +102,7 @@ public class CountWithTimeout {
 }
 
 /*
-lement = (a,abase,0), timestamp = 0
+element = (a,abase,0), timestamp = 0
 element = (b,bard,0), timestamp = 0
 element = (a,abate,70000), timestamp = 70000
 element = (b,barrage,70000), timestamp = 70000
