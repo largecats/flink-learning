@@ -33,8 +33,8 @@ public class AsyncIOBatch {
                 // as soon as the async request finishes, order of stream elements can be different from before
                 stream,
                 new AsyncOperation(),
-                10000, // How long an async request will take before it's considered failed; decrease to 1000 to see
-                // timeout
+                1000, // How long an async request will take before it's considered failed; won't have timeout even
+                // if thread.sleep is 5000ms because the input stream is bounded
                 TimeUnit.MILLISECONDS,
                 100); // How many async requests can happen at the same time
 
