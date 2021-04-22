@@ -19,7 +19,7 @@ public class FixedInputGenerator implements SourceFunction<Tuple3<String, String
             Tuple3.of("b", "baroque", 5500L),
             Tuple3.of("a", "abdicate", 7500L),
             Tuple3.of("b", "barren", 8000L)
-    };
+    }; // Array iterator is not serializable
 
     @Override
     public void run(SourceContext<Tuple3<String, String, Long>> ctx) throws Exception {
