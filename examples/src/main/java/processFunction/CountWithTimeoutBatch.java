@@ -16,7 +16,7 @@ import org.apache.flink.util.Collector;
 
 import java.time.Duration;
 
-public class CountWithTimeout {
+public class CountWithTimeoutBatch {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

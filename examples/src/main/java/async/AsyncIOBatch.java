@@ -1,7 +1,6 @@
 package async;
 
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
@@ -10,7 +9,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
 
-import javax.xml.transform.Result;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class AsyncIOBatch {
 
@@ -36,7 +33,8 @@ public class AsyncIOBatch {
                 // as soon as the async request finishes, order of stream elements can be different from before
                 stream,
                 new AsyncOperation(),
-                1000, // How long an async request will take before it's considered failed
+                10000, // How long an async request will take before it's considered failed; decrease to 1000 to see
+                // timeout
                 TimeUnit.MILLISECONDS,
                 100); // How many async requests can happen at the same time
 
@@ -72,10 +70,10 @@ public class AsyncIOBatch {
         }
 
         @Override
-        public void asyncInvoke(String key, final ResultFuture<Tuple2<String, String>> resultFuture) throws Exception {
+        public void asyncInvoke(String input, final ResultFuture<Tuple2<String, String>> resultFuture) throws Exception {
 
             // Issue the async query request, receive a Future as result
-            final Future<String> result = query(map, key);
+            final Future<String> result = query(map, input);
 
             // Set callback to be executed once the request is complete
             CompletableFuture.supplyAsync(new Supplier<String>() {
@@ -90,9 +88,17 @@ public class AsyncIOBatch {
                     }
                 }
             }).thenAccept( (String dbResult) -> {
-                resultFuture.complete(Collections.singleton(new Tuple2<>(key, dbResult))); // Completed with first
+                resultFuture.complete(Collections.singleton(new Tuple2<>(input, dbResult))); // Completed with first
                 // call, subsequent calls are ignored
             });
         }
     }
 }
+
+/*
+6> (d,dog)
+3> (b,banana)
+4> (c,cat)
+5> (c,cat)
+2> (a,apple)
+ */
