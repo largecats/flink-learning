@@ -30,7 +30,13 @@ public class AsyncIO {
                 "c",
                 "c",
                 "d");
-        DataStream<Tuple2<String, String>> resultStream = AsyncDataStream.unorderedWait(stream, new AsyncOperation(), 1000, TimeUnit.MILLISECONDS, 100);
+        DataStream<Tuple2<String, String>> resultStream = AsyncDataStream.unorderedWait( // Result records are emitted
+                // as soon as the async request finishes, order of stream elements can be different from before
+                stream,
+                new AsyncOperation(),
+                1000, // How long an async request will take before it's considered failed
+                TimeUnit.MILLISECONDS,
+                100); // How many async requests can happen at the same time
 
         env.execute();
     }
@@ -79,7 +85,8 @@ public class AsyncIO {
                     }
                 }
             }).thenAccept( (String dbResult) -> {
-                resultFuture.complete(Collections.singleton(new Tuple2<>(key, dbResult)));
+                resultFuture.complete(Collections.singleton(new Tuple2<>(key, dbResult))); // Completed with first
+                // call, subsequent calls are ignored
             });
         }
     }
