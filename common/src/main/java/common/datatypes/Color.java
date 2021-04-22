@@ -3,7 +3,8 @@ package common.datatypes;
 import java.io.Serializable;
 import java.lang.Object;
 
-public class Color implements Serializable {
+//public class Color implements Serializable { // not POJO
+public class Color { // POJO
     public Color() {};
 
     public Color(String value) {

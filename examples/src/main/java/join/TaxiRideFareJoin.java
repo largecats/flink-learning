@@ -1,3 +1,5 @@
+package join;
+
 import common.datatypes.TaxiFare;
 import common.datatypes.TaxiRide;
 import common.sources.TaxiFareGenerator;

@@ -1,3 +1,5 @@
+package broadcastState;
+
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -180,9 +182,22 @@ stored = null
 shape.equals(rule.first) = true
 stored = [Item@16937fb2]
 
-This issue disappeared after changing to keyBy x.color.value, which is String.
+This issue disappeared after changing to keyBy(x -> x.color.value), where x.color.value is String.
 
-But according to keyBy documentation in https://ci.apache.org/projects/flink/flink-docs-release-1.12/dev/stream/operators/, a POJO with overridden hashCode() should be a valid key.
+public class Color { // POJO
+    public Color() {};
+
+    public Color(String value) {
+        this.value = value;
+    }
+
+    public String value;
+
+    @Override
+    public int hashCode() {return (int) this.value.hashCode();}
+}
+
+But Color is POJO, and according to keyBy documentation in https://ci.apache.org/projects/flink/flink-docs-release-1.12/dev/stream/operators/, a POJO with overridden hashCode() should be a valid key.
 So not sure why keyBy x.color has the above issue.
 
 2. The first items for each key may have been processed before rule is detected. So to observe the effect of rule evaluation, can insert some more

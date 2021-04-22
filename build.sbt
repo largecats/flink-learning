@@ -5,7 +5,7 @@ lazy val common = (project in file("common"))
   .settings(name := "common")
   .settings(globalSettings)
 
-lazy val example = newProject(name = "example")
+lazy val examples = newProject(name = "examples")
 lazy val minVsMinBy = newProject(name = "minVsMinBy")
 
 lazy val globalSettings = dependencySettings ++ runSettings ++ assemblySettings

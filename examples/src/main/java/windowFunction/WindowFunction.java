@@ -1,3 +1,5 @@
+package windowFunction;
+
 import org.apache.commons.net.ntp.TimeStamp;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.AggregateFunction;
@@ -26,13 +28,7 @@ public class WindowFunction {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        DataStream<Tuple3<Long, Long, Long>> input = env.fromElements(
-                Tuple3.of(1L, 3L, 0L), // key, value, timestamp
-                Tuple3.of(1L, -2L, 1L),
-                Tuple3.of(1L, 19L, 2L),
-                Tuple3.of(2L, 10L, 3L),
-                Tuple3.of(2L, 5L, 4L),
-                Tuple3.of(2L, 23L, 5L))
+        DataStream<Tuple3<Long, Long, Long>> input = env.fromElements(Input.DATA)
                 .assignTimestampsAndWatermarks(
                         WatermarkStrategy
                                 .<Tuple3<Long, Long, Long>>forBoundedOutOfOrderness(Duration.ofMillis(0))
@@ -59,8 +55,8 @@ public class WindowFunction {
 
         System.out.println("SumProcess");
         Iterator<String> sumProcess = keyedInput
-//                .window(TumblingProcessingTimeWindows.of(Time.milliseconds(2))) // need to use TimeWindow in SumProcess; output may be incomplete if delay is > 1ms
-                .countWindow(3) // need to use GlobalWindow in SumProcess (so count window is a type of global window?)
+//                .window(TumblingEventTimeWindows.of(Time.milliseconds(2))) // if use this line, need to use TimeWindow in SumProcess
+                .countWindow(3) // if use this line, need to use GlobalWindow in SumProcess (so count window is a type of global window?)
                 .process(new SumProcess())
                 .executeAndCollect();
         while (sumProcess.hasNext()) {
