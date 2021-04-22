@@ -35,12 +35,13 @@ public class AsyncIO {
         env.execute();
     }
 
-
+    // Sends requests and sets callback.
     public static class AsyncOperation extends RichAsyncFunction<String, Tuple2<String, String>> {
 
         private transient StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        private transient Map<String, String> map = new HashMap<>();
+        private transient Map<String, String> map = new HashMap<>(); // Simulate the database client
 
+        // Query method of the "database client"
         Future<String> query(Map<String, String> map, String key) throws Exception {
             Thread.sleep(5000);
             return ConcurrentUtils.constantFuture(map.get(key));
@@ -55,15 +56,20 @@ public class AsyncIO {
         }
 
         @Override
-        public void close() throws Exception {}
+        public void close() throws Exception {
+            map = new HashMap<>();
+        }
 
         @Override
         public void asyncInvoke(String key, final ResultFuture<Tuple2<String, String>> resultFuture) throws Exception {
 
+            // Issue the async query request, receive a Future as result
             final Future<String> result = query(map, key);
 
+            // Set callback to be executed once the request is complete
             CompletableFuture.supplyAsync(new Supplier<String>() {
 
+                // The callback forwards the request result to the result Future
                 @Override
                 public String get() {
                     try {
