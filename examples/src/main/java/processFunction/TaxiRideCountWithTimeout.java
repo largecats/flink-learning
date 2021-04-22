@@ -1,3 +1,5 @@
+package processFunction;
+
 import common.datatypes.TaxiRide;
 import common.sources.TaxiRideGenerator;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;

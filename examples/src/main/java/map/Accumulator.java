@@ -1,3 +1,5 @@
+package map;
+
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.accumulators.IntCounter;
 import org.apache.flink.api.common.functions.RuntimeContext;
