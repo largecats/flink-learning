@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.OutputTag;
 import org.apache.flink.util.Collector;
 
-public class SideOutput {
+public class SideOutputBatch {
     private static final OutputTag<Tuple2<String, Integer>> negative = new OutputTag<Tuple2<String, Integer>>("negative") {};
 
     public static void main(String[] args) throws Exception {

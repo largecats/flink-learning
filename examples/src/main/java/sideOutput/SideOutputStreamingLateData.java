@@ -16,7 +16,7 @@ import org.apache.flink.util.OutputTag;
 
 import java.time.Duration;
 
-public class SideOutputLateData {
+public class SideOutputStreamingLateData {
 
     public static Tuple3<String, String, Long>[] input = new Tuple3[]{
             Tuple3.of("a", "4", 4L),
@@ -34,7 +34,7 @@ public class SideOutputLateData {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-//        DataStream<Tuple3<String, Integer, Long>> inputStream = env.fromElements(input)
+//        DataStream<Tuple3<String, Integer, Long>> inputStream = env.fromElements(input) // can't simulate timeout
 //                .assignTimestampsAndWatermarks(
 //                        WatermarkStrategy
 //                                .<Tuple3<String, Integer, Long>>forBoundedOutOfOrderness(Duration.ofMillis(0))
