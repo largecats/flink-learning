@@ -1,28 +1,36 @@
+package operator;
+
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 public class MinVsMinBy {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        List data = new ArrayList<Tuple3<Integer, Integer, Integer>>();
-        data.add(new Tuple3<>(0, 2, 3));
-        data.add(new Tuple3<>(0, 1, 1));
-        data.add(new Tuple3<>(0, 3, 4));
-        data.add(new Tuple3<>(1, 3, 4));
-        data.add(new Tuple3<>(1, 2, 9));
-        data.add(new Tuple3<>(1, 0, 2));
-
-        DataStreamSource<Tuple3<Integer, Integer, Integer>> source = env.fromCollection(data);
-        source.keyBy(x -> x.f0).min(2).print(); // Key by 1st field, min by 3rd field within each key
-//        source.keyBy(x -> x.f0).minBy(2).print();
-
-        env.execute();
+        DataStreamSource<Tuple3<Integer, Integer, Integer>> source = env.fromElements(
+                Tuple3.of(0, 2, 3),
+                Tuple3.of(0, 1, 1),
+                Tuple3.of(0, 3, 4),
+                Tuple3.of(1, 3, 4),
+                Tuple3.of(1, 2, 9),
+                Tuple3.of(1, 0, 2)
+        );
+        Iterator<Tuple3<Integer, Integer, Integer>> minResult = source.keyBy(x -> x.f0).min(2).executeAndCollect(); // Key by 1st field, min by 3rd field within each key
+        System.out.println("min() output:");
+        while (minResult.hasNext()) {
+            System.out.println(minResult.next());
+        }
+        System.out.println("minBy() output:");
+        Iterator<Tuple3<Integer, Integer, Integer>> minByResult = source.keyBy(x -> x.f0).minBy(2).executeAndCollect();
+        while (minByResult.hasNext()) {
+            System.out.println(minByResult.next());
+        }
     }
 }
 
