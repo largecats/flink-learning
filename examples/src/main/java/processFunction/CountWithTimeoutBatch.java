@@ -22,7 +22,7 @@ public class CountWithTimeoutBatch {
 
     public static Tuple3<String, String, Long>[] input = new Tuple3[]{
             // input 1
-            Tuple3.of("a", "abase", 0L),
+            Tuple3.of("a", "abase", 0L), // will trigger 4 outputs upon timeout for key b and 1 output for key a
             Tuple3.of("b", "bard", 500L),
             Tuple3.of("a", "abate", 2500L),
             Tuple3.of("b", "barrage", 3000L),
@@ -31,7 +31,7 @@ public class CountWithTimeoutBatch {
             Tuple3.of("a", "abdicate", 7500L),
             Tuple3.of("b", "barren", 8000L)
             // input 2
-//            Tuple3.of("a", "abase", 0L), // will trigger timeout for every two inputs
+//            Tuple3.of("a", "abase", 0L), // will trigger 4 outputs upon timeout for both key a and key b
 //            Tuple3.of("b", "bard", 1250L),
 //            Tuple3.of("a", "abate", 2500L),
 //            Tuple3.of("b", "barrage", 3750L),
