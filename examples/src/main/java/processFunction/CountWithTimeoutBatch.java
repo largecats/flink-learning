@@ -21,14 +21,22 @@ import common.utils.FixedInputGenerator;
 public class CountWithTimeoutBatch {
 
     public static Tuple3<String, String, Long>[] input = new Tuple3[]{
-            Tuple3.of("a", "abase", 0L),
-            Tuple3.of("b", "bard", 500L),
+//            Tuple3.of("a", "abase", 0L),
+//            Tuple3.of("b", "bard", 500L),
+//            Tuple3.of("a", "abate", 2500L),
+//            Tuple3.of("b", "barrage", 3000L),
+//            Tuple3.of("a", "abbreviate", 5000L),
+//            Tuple3.of("b", "baroque", 5500L),
+//            Tuple3.of("a", "abdicate", 7500L),
+//            Tuple3.of("b", "barren", 8000L)
+            Tuple3.of("a", "abase", 0L), // will trigger timeout for every two inputs
+            Tuple3.of("b", "bard", 1250L),
             Tuple3.of("a", "abate", 2500L),
-            Tuple3.of("b", "barrage", 3000L),
+            Tuple3.of("b", "barrage", 3750L),
             Tuple3.of("a", "abbreviate", 5000L),
-            Tuple3.of("b", "baroque", 5500L),
+            Tuple3.of("b", "baroque", 6250L),
             Tuple3.of("a", "abdicate", 7500L),
-            Tuple3.of("b", "barren", 8000L)
+            Tuple3.of("b", "barren", 8250L)
     };
 
     public static void main(String[] args) throws Exception {
@@ -50,64 +58,6 @@ public class CountWithTimeoutBatch {
 
         env.execute();
 
-    }
-
-    public static class CountWithTimestamp {
-        public String key;
-        public long count;
-        public long lastModified;
-    }
-
-    public static class CountWithTimeoutProcessFunction extends KeyedProcessFunction<String, Tuple3<String, String, Long>, Tuple2<String, Long>> { // typo in Doc, the first argument should be String, not Tuple
-        private ValueState<CountWithTimestamp> state;
-
-        @Override
-        public void open(Configuration parameters) throws Exception {
-            state = getRuntimeContext().getState(new ValueStateDescriptor<>("myState", CountWithTimestamp.class));
-        }
-
-        @Override
-        public void processElement(
-                Tuple3<String, String, Long> element,
-                Context ctx,
-                Collector<Tuple2<String, Long>> out) throws Exception {
-            System.out.println("element = " + element + ", timestamp = " + ctx.timestamp());
-            // retrieve current count
-            CountWithTimestamp current = state.value();
-            if (current == null) {
-                current = new CountWithTimestamp();
-                current.key = element.f0;
-            }
-
-            // update state's count
-            current.count++;
-
-            // set state's timestamp to the current record's assigned event time
-            current.lastModified = ctx.timestamp();
-
-            // write state back
-            state.update(current);
-
-            // set timer for 60s later
-            ctx.timerService().registerEventTimeTimer(current.lastModified + 1000);
-        }
-
-        @Override
-        public void onTimer(
-                long timestamp,
-                OnTimerContext ctx,
-                Collector<Tuple2<String, Long>> out) throws Exception {
-            // get state for the key that scheduled this timer that is firing
-            CountWithTimestamp result = state.value();
-
-            // check if this timer is latest
-            System.out.println("timestamp = " + timestamp + ", result.lastModified = " + result.lastModified);
-            if (timestamp == result.lastModified + 1000) {
-                // emit the state on timeout
-                System.out.println("result.key = " + result.key + ", result.count = " + result.count);
-                out.collect(new Tuple2<String, Long>(result.key, result.count));
-            }
-        }
     }
 }
 
@@ -136,6 +86,40 @@ element = (a,abbreviate,5000), timestamp = 5000
 timestamp = 3500, result.lastModified = 5000
 element = (a,abdicate,7500), timestamp = 7500
 timestamp = 6000, result.lastModified = 7500
+timestamp = 8500, result.lastModified = 7500
+result.key = a, result.count = 4
+6> (a,4)
+
+Second set of input:
+element = (a,abase,0), timestamp = 0
+element = (b,bard,1250), timestamp = 1250
+timestamp = 1000, result.lastModified = 0 // triggered as the 1250ms record arrives
+timestamp = 2250, result.lastModified = 1250 // How is this timer triggered?
+result.key = a, result.count = 1
+result.key = b, result.count = 1
+2> (b,1)
+6> (a,1)
+element = (a,abate,2500), timestamp = 2500
+element = (b,barrage,3750), timestamp = 3750
+timestamp = 4750, result.lastModified = 3750
+result.key = b, result.count = 2
+2> (b,2)
+timestamp = 3500, result.lastModified = 2500
+element = (b,baroque,6250), timestamp = 6250
+result.key = a, result.count = 2
+timestamp = 7250, result.lastModified = 6250
+6> (a,2)
+result.key = b, result.count = 3
+element = (a,abbreviate,5000), timestamp = 5000
+2> (b,3)
+timestamp = 6000, result.lastModified = 5000
+element = (b,barren,8250), timestamp = 8250
+result.key = a, result.count = 3
+timestamp = 9250, result.lastModified = 8250
+6> (a,3)
+result.key = b, result.count = 4
+element = (a,abdicate,7500), timestamp = 7500
+2> (b,4)
 timestamp = 8500, result.lastModified = 7500
 result.key = a, result.count = 4
 6> (a,4)

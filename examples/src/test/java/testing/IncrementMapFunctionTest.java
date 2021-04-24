@@ -2,7 +2,6 @@ package testing;
 
 import org.junit.Test;
 import static org.junit.Assert.*; // has to be static
-import java.util.Optional;
 
 public class IncrementMapFunctionTest {
 
@@ -12,6 +11,6 @@ public class IncrementMapFunctionTest {
         IncrementMapFunction incrementer = new IncrementMapFunction();
 
         // call the methods that you have implemented
-        assertEquals(3L, (long) incrementer.map(2L));
+        assertEquals(3L, (long) incrementer.map(2L)); // need to cast to long, otherwise will throw java reference to assertequals is ambiguous
     }
 }

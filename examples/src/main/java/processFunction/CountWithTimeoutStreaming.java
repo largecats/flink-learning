@@ -32,13 +32,13 @@ public class CountWithTimeoutStreaming {
 
     }
 
-    public static class TaxiRideCountWithTimestamp {
-        public long key;
-        public long count;
-        public long lastModified;
-    }
-
     public static class TaxiRideCountWithTimeoutProcessFunction extends KeyedProcessFunction<Long, TaxiRide, Tuple2<Long, Long>> { // typo in Doc, the first argument should be String, not Tuple
+        public static class TaxiRideCountWithTimestamp {
+            public long key;
+            public long count;
+            public long lastModified;
+        }
+
         private ValueState<TaxiRideCountWithTimestamp> state;
 
         @Override

@@ -21,6 +21,10 @@ lazy val dependencySettings = Seq(
     "com.softwaremill.sttp" %% "core" % "1.5.11",
     // for testing
     "junit" % "junit" % "4.11" % Test,
+    "org.mockito" % "mockito-core" % "3.9.0" % Test,
+    "org.apache.flink" %% "flink-test-utils" % "1.12.0" % Test,
+    "org.apache.flink" %% "flink-runtime" % "1.12.0" % Test,
+    "org.apache.flink" %% "flink-streaming-java" % "1.12.2" % Test classifier "tests", // test-jar, for TestHarnesses only
     "org.scalacheck" %% "scalacheck" % "1.13.5" % Test, // dependency is only for the Test configuration
     "org.scalatest" %% "scalatest" % "3.0.5" % Test,
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.6" % Test
