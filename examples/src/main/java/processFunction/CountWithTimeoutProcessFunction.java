@@ -27,7 +27,7 @@ public class CountWithTimeoutProcessFunction extends KeyedProcessFunction<String
             Tuple3<String, String, Long> element,
             Context ctx,
             Collector<Tuple2<String, Long>> out) throws Exception {
-        System.out.println("element = " + element + ", timestamp = " + ctx.timestamp());
+        // System.out.println("element = " + element + ", timestamp = " + ctx.timestamp());
         // retrieve current count
         CountWithTimestamp current = state.value();
         if (current == null) {
@@ -57,10 +57,10 @@ public class CountWithTimeoutProcessFunction extends KeyedProcessFunction<String
         CountWithTimestamp result = state.value();
 
         // check if this timer is latest
-        System.out.println("timestamp = " + timestamp + ", result.lastModified = " + result.lastModified);
+        // System.out.println("timestamp = " + timestamp + ", result.lastModified = " + result.lastModified);
         if (timestamp == result.lastModified + 1000) {
             // emit the state on timeout
-            System.out.println("result.key = " + result.key + ", result.count = " + result.count);
+            // System.out.println("result.key = " + result.key + ", result.count = " + result.count);
             out.collect(new Tuple2<String, Long>(result.key, result.count));
         }
     }
