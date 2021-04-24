@@ -51,18 +51,16 @@ public class StatefulProcessFunctionTest {
                 Lists.newArrayList(),
                 testHarness.extractOutputValues());
         testHarness.processElement(Tuple3.of("b", "bard", 1250L), 1250L);
-        testHarness.processElement(Tuple3.of("a", "abate", 2500L), 2500L);
         assertEquals(
                 Lists.newArrayList(
-                        Tuple2.of("a", 1),
+                        Tuple2.of("a", 1), // assert fails even though the printed output of CountWithTimeoutBatch seems to be the case
                         Tuple2.of("b", 1)
                 ),
                 testHarness.extractOutputValues());
 //        testHarness.processWatermark(1000L); // advance event time to trigger event time timers
 //        assertEquals(
 //                Lists.newArrayList(
-//                        new StreamRecord<>(Tuple2.of("a", 1), 1000L)
-////                        Tuple2.of("a", 1)
+//                        Tuple2.of("a", 1) // assert fails even though both are java.util.ArrayList<[(a, 1)]>
 //                ),
 //                testHarness.extractOutputValues());
     }

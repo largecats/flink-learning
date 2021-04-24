@@ -46,10 +46,7 @@ public class CountWithTimeoutBatch {
 //                        WatermarkStrategy
 //                                .<Tuple3<String, String, Long>>forBoundedOutOfOrderness(Duration.ofMillis(0))
 //                                .withTimestampAssigner((event, timestamp) -> event.f2));
-        DataStream<Tuple3<String, String, Long>> stream = env.addSource(new FixedInputGenerator().getGenerator(input));
-        // Source
-        // with
-        // actual time gaps
+        DataStream<Tuple3<String, String, Long>> stream = env.addSource(new FixedInputGenerator().getGenerator(input)); // Source with actual time gaps
         DataStream<Tuple2<String, Long>> result = stream
                 .keyBy(value -> value.f0)
                 .process(new CountWithTimeoutProcessFunction());
@@ -57,7 +54,6 @@ public class CountWithTimeoutBatch {
         result.print();
 
         env.execute();
-
     }
 }
 
