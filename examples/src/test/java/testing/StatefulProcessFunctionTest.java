@@ -47,21 +47,19 @@ public class StatefulProcessFunctionTest {
     @Test
     public void testingStatefulProcessFunction() throws Exception {
         testHarness.processElement(Tuple3.of("a", "abase", 0L), 0L);
+        testHarness.processWatermark(0L);
         assertEquals(
                 Lists.newArrayList(),
                 testHarness.extractOutputValues());
         testHarness.processElement(Tuple3.of("b", "bard", 1250L), 1250L);
-        assertEquals(
+        testHarness.processWatermark(1250L);
+        testHarness.processElement(Tuple3.of("a", "abate", 2500L), 2500L);
+        testHarness.processWatermark(2500L); // if without processWatermark, the output would be []
+        assertEquals( // assert fails even though both are java.util.ArrayList<[(a,1), (b,1)]>
                 Lists.newArrayList(
-                        Tuple2.of("a", 1), // assert fails even though the printed output of CountWithTimeoutBatch seems to be the case
+                        Tuple2.of("a", 1),
                         Tuple2.of("b", 1)
                 ),
                 testHarness.extractOutputValues());
-//        testHarness.processWatermark(1000L); // advance event time to trigger event time timers
-//        assertEquals(
-//                Lists.newArrayList(
-//                        Tuple2.of("a", 1) // assert fails even though both are java.util.ArrayList<[(a, 1)]>
-//                ),
-//                testHarness.extractOutputValues());
     }
 }
