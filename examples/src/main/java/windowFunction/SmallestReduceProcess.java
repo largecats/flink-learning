@@ -1,6 +1,5 @@
 package windowFunction;
 
-import org.apache.commons.net.ntp.TimeStamp;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;

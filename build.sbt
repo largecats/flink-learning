@@ -14,14 +14,17 @@ lazy val dependencySettings = Seq(
     "org.apache.flink" %% "flink-scala" % "1.12.2" % "provided",
     "org.apache.flink" %% "flink-streaming-scala" % "1.12.2" % "provided",
     "org.apache.flink" %% "flink-examples-streaming" % "1.12.2" % "provided",
-    "org.apache.spark" %% "spark-core" % "2.1.0" % "provided",
-    "org.apache.spark" %% "spark-sql" % "2.1.0" % "provided",
     "joda-time" % "joda-time" % "2.9.3" % "provided",
     "org.joda" % "joda-convert" % "1.8" % "provided",
     "com.kailuowang" %% "henkan-convert" % "0.6.2",
     "com.github.daddykotex" %% "courier" % "1.0.0",
     "com.softwaremill.sttp" %% "core" % "1.5.11",
     // for testing
+    "junit" % "junit" % "4.11" % Test,
+    "org.mockito" % "mockito-core" % "3.9.0" % Test,
+    "org.apache.flink" %% "flink-test-utils" % "1.12.0" % Test,
+    "org.apache.flink" %% "flink-runtime" % "1.12.0" % Test,
+    "org.apache.flink" %% "flink-streaming-java" % "1.12.2" % Test classifier "tests", // test-jar, for TestHarnesses only
     "org.scalacheck" %% "scalacheck" % "1.13.5" % Test, // dependency is only for the Test configuration
     "org.scalatest" %% "scalatest" % "3.0.5" % Test,
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.6" % Test
