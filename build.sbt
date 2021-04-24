@@ -20,6 +20,7 @@ lazy val dependencySettings = Seq(
     "com.github.daddykotex" %% "courier" % "1.0.0",
     "com.softwaremill.sttp" %% "core" % "1.5.11",
     // for testing
+    "junit" % "junit" % "4.11" % Test,
     "org.scalacheck" %% "scalacheck" % "1.13.5" % Test, // dependency is only for the Test configuration
     "org.scalatest" %% "scalatest" % "3.0.5" % Test,
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.6" % Test
