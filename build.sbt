@@ -14,8 +14,6 @@ lazy val dependencySettings = Seq(
     "org.apache.flink" %% "flink-scala" % "1.12.2" % "provided",
     "org.apache.flink" %% "flink-streaming-scala" % "1.12.2" % "provided",
     "org.apache.flink" %% "flink-examples-streaming" % "1.12.2" % "provided",
-    "org.apache.spark" %% "spark-core" % "2.1.0" % "provided",
-    "org.apache.spark" %% "spark-sql" % "2.1.0" % "provided",
     "joda-time" % "joda-time" % "2.9.3" % "provided",
     "org.joda" % "joda-convert" % "1.8" % "provided",
     "com.kailuowang" %% "henkan-convert" % "0.6.2",
