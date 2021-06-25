@@ -20,6 +20,7 @@ package common.utils;
 
 import java.time.Instant;
 import java.util.Random;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,8 +35,8 @@ public class DataGenerator {
 	private static final int SECONDS_BETWEEN_RIDES = 20;
 	private static final int NUMBER_OF_DRIVERS = 200;
 	private static final Instant beginTime = Instant.parse("2020-01-01T12:00:00.00Z");
-	private static final List<String> COLORS = List.of("red", "blue");
-	private static final List<String> SHAPES = List.of("circle", "triangle", "rectangle");
+	private static final List<String> COLORS = Arrays.asList("red", "blue");
+	private static final List<String> SHAPES = Arrays.asList("circle", "triangle", "rectangle");
 
 	private transient long rideId;
 
