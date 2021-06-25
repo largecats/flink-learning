@@ -19,4 +19,9 @@ public class Color { // POJO
      */
     @Override
     public int hashCode() {return (int) this.value.hashCode();}
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof Color && this.value.equals(((Color) other).value);
+    }
 }
