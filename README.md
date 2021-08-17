@@ -16,17 +16,17 @@ Assemble and run in server:
     
     Use `KeyBucketAssigner`. 
     
-    Write text file to local filesystem: See https://github.com/largecats/flink-learning/-/blob/main/useCase/splitStreamByKeyLocalFs/src/main/java/SameSchema.java.
+    Write text file to local filesystem: See https://github.com/largecats/flink-learning/blob/main/useCase/splitStreamByKeyLocalFs/src/main/java/SameSchema.java.
     
-    Write parquet to HDFS: See https://github.com/largecats/flink-learning/-/tree/main/useCase/splitStreamByKeyHdfsParquetSameSchema.
+    Write parquet to HDFS: See https://github.com/largecats/flink-learning/tree/main/useCase/splitStreamByKeyHdfsParquetSameSchema.
     
 2. Must all sub-streams be written out using the same schema? Or we can specify different schemas for each sub-stream?
 
     Can manually specify different schemas for each sub-stream. 
     
-    Write text file to local filesystem: See https://github.com/largecats/flink-learning/-/blob/main/useCase/splitStreamByKeyLocalFs/src/main/java/DifferentSchema.java.
+    Write text file to local filesystem: See https://github.com/largecats/flink-learning/blob/main/useCase/splitStreamByKeyLocalFs/src/main/java/DifferentSchema.java.
     
-    Write parquet to HDFS: See https://github.com/largecats/flink-learning/-/tree/main/useCase/splitStreamByKeyHdfsParquetDifferentSchema.
+    Write parquet to HDFS: See https://github.com/largecats/flink-learning/tree/main/useCase/splitStreamByKeyHdfsParquetDifferentSchema.
     
 3. When reading from Kafka topics, how to increase parallelism before or while reading data (so `rebalance()` won't help much) besides increasing the topic's partitions?
     
@@ -44,7 +44,7 @@ Assemble and run in server:
 
     Implement `KafkaSerializationSchema`. Its method `serialize`'s return type is `ProducerRecord`, which allows specifying the topic and partition for each record.
     
-    See https://github.com/largecats/flink-learning/-/tree/main/useCase/splitKafkaTopic.
+    See https://github.com/largecats/flink-learning/tree/main/useCase/splitKafkaTopic.
     
     1) The `FlinkKafkaProducer` constructor requires topic name, so how does this topic interact with the topic specified in `ProducerRecord`?
     Will it be overwritten?
